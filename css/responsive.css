@@ -1,0 +1,92 @@
+/* ── 12. Responsive Overrides ───────────────────────────────── */
+@media (max-width: 900px) {
+  .hero__content-inner {
+    max-width: 560px;
+    gap: var(--space-5);
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --mosaic-speed: 35s;
+  }
+  
+  .hero__content {
+    padding: var(--space-6) var(--space-4);
+    align-items: flex-start;
+  }
+  
+  .hero__content-inner {
+    text-align: left;
+    align-items: flex-start;
+    gap: var(--space-5);
+    max-width: 100%;
+  }
+  
+  .hero__headline {
+    align-items: flex-start;
+    letter-spacing: -0.035em;
+  }
+  
+  .hero__actions {
+    justify-content: flex-start;
+  }
+  
+  .hero__stats {
+    gap: var(--space-4);
+  }
+  
+  .hero__stat-value {
+    font-size: 1.4rem;
+  }
+  
+  .hero__overlay--left-curtain,
+  .hero__overlay--right-curtain {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero__headline-line {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero__content-inner {
+    gap: var(--space-3);
+  }
+  
+  .hero__description {
+    display: none;
+  }
+  
+  .hero__stats {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__mosaic-band {
+    animation: none !important;
+  }
+  
+  .animate-in {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  
+  .hero--loaded .animate-in {
+    opacity: 1;
+    transform: none;
+  }
+  
+  .hero__scroll-cue-line {
+    animation: none;
+  }
+  
+  .hero__eyebrow-dot {
+    animation: none;
+  }
+}

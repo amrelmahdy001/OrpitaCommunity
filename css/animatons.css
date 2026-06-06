@@ -1,0 +1,52 @@
+/* ── 10. Scroll Cue ─────────────────────────────────────────── */
+.hero__scroll-cue {
+  position: absolute;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  transition-delay: 1.6s;
+}
+
+.hero--loaded .hero__scroll-cue {
+  opacity: 1;
+}
+
+.hero__scroll-cue-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--purple), transparent);
+  animation: scroll-line 2s ease-in-out infinite;
+}
+
+@keyframes scroll-line {
+  0%   { transform: scaleY(0); transform-origin: top;    opacity: 1; }
+  50%  { transform: scaleY(1); transform-origin: top;    opacity: 1; }
+  51%  { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+  100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+}
+
+/* ── 11. Entrance Animations ────────────────────────────────── */
+.animate-in {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity  0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0s);
+}
+
+.hero--loaded .animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--purple), 0 0 12px var(--purple-glow); }
+  50%       { opacity: 0.6; box-shadow: 0 0 3px var(--purple); }
+}

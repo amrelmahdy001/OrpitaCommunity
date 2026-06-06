@@ -1,0 +1,178 @@
+/* ── 4. Mosaic Layer ────────────────────────────────────────── */
+.hero__mosaic-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.hero--loaded .hero__mosaic-layer {
+  opacity: var(--mosaic-opacity);
+}
+
+.hero__mosaic-band {
+  display: flex;
+  height: 100%;
+  gap: var(--mosaic-gap);
+  will-change: transform;
+  animation: mosaic-scroll var(--mosaic-speed) linear infinite;
+  animation-play-state: paused;
+}
+
+.hero--loaded .hero__mosaic-band {
+  animation-play-state: running;
+}
+
+@keyframes mosaic-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.hero__mosaic-panel {
+  flex: 0 0 100vw;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 8), 1fr);
+  grid-template-rows: repeat(var(--rows, 4), 1fr);
+  gap: var(--mosaic-gap);
+}
+
+/* ── 5. Tile Styles & Fallbacks ─────────────────────────────── */
+.hero__tile {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  filter: grayscale(70%) brightness(0.7) contrast(1.1);
+  transition: filter 0.5s ease;
+}
+
+.hero__tile:hover .hero__tile-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero__tile-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 1;
+}
+
+.hero__tile-image--loaded {
+  opacity: 1;
+}
+
+.hero__tile-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    var(--dept-color, #8b5cf6) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hero__tile-fallback--visible {
+  opacity: 1;
+}
+
+.hero__tile-initials {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 3vw, 2.5rem);
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  user-select: none;
+}
+
+.hero__tile-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 0.4rem 0.5rem 0.35rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hero__tile-label span:first-child {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 0.05em;
+}
+
+.hero__tile-dept {
+  font-size: 0.5rem;
+  color: var(--white-40);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero__tile-icon-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: linear-gradient(
+    145deg,
+    rgba(0, 0, 0, 0.65) 0%,
+    var(--dept-color, #8b5cf6) 100%
+  );
+  padding: 0.5rem;
+}
+
+.hero__tile-dept-icon {
+  width: 40%;
+  height: 40%;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.hero__tile-dept-fallback {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  line-height: 1;
+}
+
+.hero__tile-dept-svg {
+  width: 42%;
+  height: 42%;
+  opacity: 0.9;
+}
+
+.hero__tile-dept-label {
+  font-family: var(--font-display);
+  font-size: clamp(0.45rem, 1vw, 0.6rem);
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
