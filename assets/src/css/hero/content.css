@@ -1,3 +1,161 @@
+/* =========================
+   HERO HEADLINE (BEM STYLE)
+   ========================= */
+
+.hero__headline {
+  font-family: 'Sora', sans-serif;
+}
+
+.hero__headline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    line-height: 0.9;
+
+    user-select: none;
+}
+
+/* Top & Bottom (build & together) */
+.hero__headline .headline-top,
+.hero__headline .headline-bottom {
+    font-family: 'Russo One', sans-serif;
+    font-weight: 400;        /* الوزن الوحيد المتاح */
+    font-size: clamp(2.6rem, 5vw, 5rem);   /* حجم كبير لكن أقل من games شوية */
+    letter-spacing: 0.05em;
+    color: #f0f0f0;
+    text-transform: uppercase;
+}
+
+/* Main dynamic word (games) - أكبر بشوية بس مش بطل مطلق */
+.hero__headline .headline-word {
+    font-family: 'Russo One', sans-serif;
+    font-weight: 400;
+    font-size: clamp(3rem, 10vw, 6rem);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    
+    background: linear-gradient(
+        90deg,
+        #7E22CE,
+        #A855F7,
+        #C084FC,
+        #A855F7,
+        #7E22CE
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    
+    /* حركة ذهاب وعودة - مش حتقطع لأنها معكوسة مش معادة */
+    animation: smoothAlternate 4s ease-in-out infinite alternate;
+}
+
+@keyframes smoothAlternate {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 0%;
+    }
+}
+.headline-word-container {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  
+  overflow: hidden;
+  
+  min-height: 1.2em;
+}
+
+.headline-word {
+  display: inline-block;
+  
+  transition:
+    transform .5s cubic-bezier(.77, 0, .18, 1),
+    opacity .5s ease;
+}
+
+/* الكلمة القديمة */
+.headline-word--exit {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+/* الكلمة الجديدة */
+.headline-word--enter {
+  position: absolute;
+  
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.headline-word--enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* =========================
+   RESPONSIVE TWEAKS
+   ========================= */
+
+@media (max-width: 768px) {
+
+
+
+    .hero__headline .headline-top,
+    .hero__headline .headline-bottom {
+        letter-spacing: 0.2em;
+    }
+}
+.hero__headline-word-container {
+  position: relative;
+  overflow: hidden;
+  
+  height: 1.1em;
+}
+
+.hero__headline-word {
+  display: block;
+  
+  transform: translateY(0);
+  opacity: 1;
+}@keyframes slideUpOut {
+  
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  
+}
+
+@keyframes slideUpIn {
+  
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+}
+
+
 /* ── 7. Foreground Content ──────────────────────────────────── */
 .hero__content {
   position: relative;
