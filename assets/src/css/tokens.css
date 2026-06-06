@@ -1,0 +1,36 @@
+/* ── 1. Design Tokens ───────────────────────────────────────── */
+:root {
+  --bg: #07070b;
+  --surface: #0e0e16;
+  --surface-2: #13131e;
+  --border: rgba(255, 255, 255, 0.06);
+  
+  --purple: #8b5cf6;
+  --purple-light: #a78bfa;
+  --purple-dark: #6d28d9;
+  --purple-glow: rgba(139, 92, 246, 0.18);
+  --purple-subtle: rgba(139, 92, 246, 0.08);
+  
+  --white: #f4f4f9;
+  --white-70: rgba(244, 244, 249, 0.70);
+  --white-40: rgba(244, 244, 249, 0.40);
+  --white-15: rgba(244, 244, 249, 0.15);
+  --white-06: rgba(244, 244, 249, 0.06);
+  
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+  
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  
+  --mosaic-gap: 3px;
+  --mosaic-speed: 50s;
+  --mosaic-opacity: 1;
+}

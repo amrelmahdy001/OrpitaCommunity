@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hero Headline — Dynamic Stacked</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet" />
+
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #08090d;
+  --surface:     #0f1016;
+  --border:      rgba(255,255,255,0.07);
+  --text-dim:    rgba(255,255,255,0.38);
+  --text-mid:    rgba(255,255,255,0.72);
+  --text-bright: rgba(255,255,255,0.96);
+
+  /* active theme (JS overrides these) */
+  --accent:      #8B5CF6;
+  --accent-soft: rgba(139,92,246,0.18);
+  --glow-color:  rgba(139,92,246,0.55);
+  --glow-size:   64px;
+
+  --t-word:  0.55s;
+  --t-ease:  cubic-bezier(0.16, 1, 0.3, 1);
+  --t-theme: 0.7s;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text-bright);
+  font-family: 'Syne', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Mosaic / particle background ────────────────────────── */
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Dynamic radial glow that follows the accent colour */
+.bg-glow {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+  opacity: 0.22;
+  transition: background var(--t-theme) var(--t-ease),
+              opacity  var(--t-theme) var(--t-ease);
+  filter: blur(60px);
+  animation: glow-breathe 6s ease-in-out infinite;
+}
+@keyframes glow-breathe {
+  0%,100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.22; }
+  50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 0.30; }
+}
+
+/* Tiny grain noise */
+.bg-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* Sparse mosaic grid tiles */
+.mosaic-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(12, 1fr);
+  gap: 1px;
+  opacity: 0.045;
+}
+.mosaic-grid span {
+  background: rgba(255,255,255,0.6);
+  border-radius: 1px;
+  opacity: 0;
+  animation: tile-pulse var(--dur,8s) ease-in-out infinite;
+  animation-delay: var(--delay,0s);
+}
+@keyframes tile-pulse {
+  0%,100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+
+/* ─── Page layout ──────────────────────────────────────────── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* ─── Hero headline wrapper ────────────────────────────────── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  user-select: none;
+}
+
+/* ─── "Build" — top small word ─────────────────────────────── */
+.hero-top {
+  font-size: clamp(1.1rem, 2.5vw, 1.55rem);
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0.7;
+  margin-bottom: 0.1em;
+  transition: color var(--t-theme) var(--t-ease);
+}
+
+/* ─── Middle dynamic word ──────────────────────────────────── */
+.hero-mid-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* reserve min height so layout doesn't jump */
+  min-height: clamp(5rem, 16vw, 11rem);
+}
+
+/* Floating icon */
+.icon-wrap {
+  position: absolute;
+  top: -0.55em;
+  right: -1.2em;
+  width: clamp(1.6rem, 3.5vw, 2.6rem);
+  height: clamp(1.6rem, 3.5vw, 2.6rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 18px var(--glow-color);
+  color: var(--accent);
+  transition:
+    background    var(--t-theme) var(--t-ease),
+    box-shadow    var(--t-theme) var(--t-ease),
+    color         var(--t-theme) var(--t-ease),
+    border-color  var(--t-theme) var(--t-ease);
+  animation: icon-float 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes icon-float {
+  0%,100% { transform: translateY(0)    rotate(0deg); }
+  40%      { transform: translateY(-6px) rotate(-3deg); }
+  70%      { transform: translateY(-3px) rotate(2deg); }
+}
+.icon-wrap svg {
+  width: 52%;
+  height: 52%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The main big word — two layers (out/in) stacked */
+.hero-mid-word {
+  position: absolute;
+  font-size: clamp(4.5rem, 14vw, 10.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--text-bright);
+  text-shadow:
+    0 0 var(--glow-size) var(--glow-color),
+    0 0 calc(var(--glow-size) * 2) var(--glow-color);
+  transition:
+    color      var(--t-theme) var(--t-ease),
+    text-shadow var(--t-theme) var(--t-ease);
+  white-space: nowrap;
+  will-change: transform, opacity, filter;
+}
+
+/* The hidden placeholder that holds layout size */
+.hero-mid-sizer {
+  font-size: clamp(4.5rem, 14vw, 10.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Word animation states */
+.hero-mid-word.state-idle {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+}
+.hero-mid-word.state-exit {
+  opacity: 0;
+  transform: translateY(-18px) scale(0.94);
+  filter: blur(6px);
+  transition:
+    opacity   var(--t-word) var(--t-ease),
+    transform var(--t-word) var(--t-ease),
+    filter    var(--t-word) var(--t-ease);
+}
+.hero-mid-word.state-enter {
+  opacity: 0;
+  transform: translateY(22px) scale(0.94);
+  filter: blur(8px);
+  transition: none; /* snap to enter state, then animate to idle */
+}
+.hero-mid-word.state-enter.running {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+  transition:
+    opacity   var(--t-word) var(--t-ease),
+    transform var(--t-word) var(--t-ease),
+    filter    var(--t-word) var(--t-ease);
+}
+
+/* Accent underline bar */
+.hero-mid-bar {
+  position: absolute;
+  bottom: -0.15em;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  height: 3px;
+  width: 60%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  border-radius: 2px;
+  box-shadow: 0 0 12px var(--glow-color);
+  transition:
+    background var(--t-theme) var(--t-ease),
+    box-shadow var(--t-theme) var(--t-ease);
+  animation: bar-in 0.5s 0.3s var(--t-ease) forwards;
+}
+@keyframes bar-in {
+  to { transform: translateX(-50%) scaleX(1); }
+}
+
+/* ─── "Together" — bottom small word ───────────────────────── */
+.hero-bot {
+  font-size: clamp(1.1rem, 2.5vw, 1.55rem);
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0.7;
+  margin-top: 0.25em;
+  transition: color var(--t-theme) var(--t-ease);
+}
+
+/* ─── Sub-caption ───────────────────────────────────────────── */
+.hero-caption {
+  margin-top: 2.8rem;
+  font-family: 'Syne Mono', monospace;
+  font-size: clamp(0.7rem, 1.3vw, 0.85rem);
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  opacity: 0;
+  animation: fade-up 0.8s 0.6s var(--t-ease) forwards;
+}
+@keyframes fade-up {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+/* ─── Dot indicator dots ────────────────────────────────────── */
+.dots {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 2.2rem;
+  opacity: 0;
+  animation: fade-up 0.8s 0.9s var(--t-ease) forwards;
+}
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--border);
+  transition:
+    background  var(--t-theme) var(--t-ease),
+    transform   0.3s var(--t-ease),
+    box-shadow  var(--t-theme) var(--t-ease);
+  cursor: pointer;
+}
+.dot.active {
+  background: var(--accent);
+  transform: scale(1.5);
+  box-shadow: 0 0 8px var(--glow-color);
+}
+
+/* ─── Progress bar (thin, top) ──────────────────────────────── */
+.progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--glow-color));
+  box-shadow: 0 0 8px var(--glow-color);
+  transform-origin: left;
+  transition:
+    background var(--t-theme) var(--t-ease),
+    box-shadow var(--t-theme) var(--t-ease);
+  z-index: 100;
+  width: 100%;
+  transform: scaleX(0);
+}
+</style>
+</head>
+<body>
+
+<!-- ── Background ───────────────────────────────────────────── -->
+<div class="bg-canvas" aria-hidden="true">
+  <div class="bg-glow" id="bgGlow"></div>
+  <div class="mosaic-grid" id="mosaicGrid"></div>
+  <div class="bg-noise"></div>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ── Hero section ─────────────────────────────────────────── -->
+<main class="page">
+  <section class="hero" role="banner">
+
+    <p class="hero-top" aria-hidden="true">Build</p>
+
+    <div class="hero-mid-wrap" id="midWrap" aria-live="polite" aria-label="Build [dynamic word] Together">
+
+      <!-- floating icon -->
+      <div class="icon-wrap" id="iconWrap" aria-hidden="true">
+        <!-- SVG injected by JS -->
+      </div>
+
+      <!-- accent bar -->
+      <span class="hero-mid-bar" id="accentBar"></span>
+
+      <!-- sizer (invisible, holds layout) -->
+      <span class="hero-mid-sizer" id="midSizer">GAMES</span>
+
+      <!-- the word slot (JS manages two layers) -->
+      <span class="hero-mid-word state-idle" id="wordA">GAMES</span>
+      <span class="hero-mid-word state-enter" id="wordB" aria-hidden="true">GAMES</span>
+    </div>
+
+    <p class="hero-bot" aria-hidden="true">Together</p>
+
+    <p class="hero-caption" id="caption">An open canvas for every creator</p>
+
+    <div class="dots" id="dots" role="tablist" aria-label="Word themes"></div>
+
+  </section>
+</main>
+
+<!-- ── SVG Icon library ──────────────────────────────────────── -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" id="svgLib">
+  <!-- controller -->
+  <symbol id="ic-games" viewBox="0 0 24 24">
+    <rect x="2" y="6" width="20" height="12" rx="4"/>
+    <line x1="7" y1="12" x2="11" y2="12"/><line x1="9" y1="10" x2="9" y2="14"/>
+    <circle cx="15" cy="11" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="17" cy="13" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <!-- brush -->
+  <symbol id="ic-art" viewBox="0 0 24 24">
+    <path d="M3 17c0 2 1.5 3 3 3 2 0 3-1.5 3-3V7l9-4-2 7c-1-0.5-2-0.5-3 0"/>
+    <circle cx="6" cy="17" r="1.5" fill="currentColor" stroke="none"/>
+  </symbol>
+  <!-- users -->
+  <symbol id="ic-teams" viewBox="0 0 24 24">
+    <circle cx="9" cy="7" r="3"/><path d="M3 21v-1a6 6 0 0 1 12 0v1"/>
+    <circle cx="17" cy="8" r="2.5"/><path d="M21 21v-1a4 4 0 0 0-4-4"/>
+  </symbol>
+  <!-- lightbulb -->
+  <symbol id="ic-ideas" viewBox="0 0 24 24">
+    <path d="M9 21h6M12 3a6 6 0 0 1 4 10.5V17H8v-3.5A6 6 0 0 1 12 3z"/>
+  </symbol>
+  <!-- star -->
+  <symbol id="ic-dreams" viewBox="0 0 24 24">
+    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+  </symbol>
+  <!-- book-open -->
+  <symbol id="ic-stories" viewBox="0 0 24 24">
+    <path d="M2 3h7a4 4 0 0 1 3 1.4A4 4 0 0 1 15 3h7v16h-7a4 4 0 0 0-3 1.4A4 4 0 0 0 9 19H2z"/>
+    <line x1="12" y1="4.4" x2="12" y2="20.4"/>
+  </symbol>
+  <!-- layout / grid -->
+  <symbol id="ic-projects" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="7" height="7" rx="1"/>
+    <rect x="14" y="3" width="7" height="7" rx="1"/>
+    <rect x="3" y="14" width="7" height="7" rx="1"/>
+    <rect x="14" y="14" width="7" height="7" rx="1"/>
+  </symbol>
+  <!-- globe -->
+  <symbol id="ic-worlds" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>
+  </symbol>
+  <!-- sparkles / magic -->
+  <symbol id="ic-experiences" viewBox="0 0 24 24">
+    <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>
+    <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z"/>
+    <path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5z"/>
+  </symbol>
+</svg>
+
+<!-- ── JavaScript ─────────────────────────────────────────────── -->
+<script>
+/* ─── Theme data ─────────────────────────────────────────────── */
+const themes = [
+  {
+    word:    'Games',
+    icon:    'ic-games',
+    accent:  '#8B5CF6',
+    glow:    'rgba(139,92,246,0.55)',
+    soft:    'rgba(139,92,246,0.18)',
+    weight:  '800',
+    caption: 'Play is the ultimate creative medium',
+  },
+  {
+    word:    'Art',
+    icon:    'ic-art',
+    accent:  '#F472B6',
+    glow:    'rgba(244,114,182,0.50)',
+    soft:    'rgba(244,114,182,0.15)',
+    weight:  '700',
+    caption: 'Express what words cannot capture',
+  },
+  {
+    word:    'Teams',
+    icon:    'ic-teams',
+    accent:  '#22D3EE',
+    glow:    'rgba(34,211,238,0.50)',
+    soft:    'rgba(34,211,238,0.14)',
+    weight:  '800',
+    caption: 'Stronger when we build as one',
+  },
+  {
+    word:    'Ideas',
+    icon:    'ic-ideas',
+    accent:  '#FCD34D',
+    glow:    'rgba(252,211,77,0.45)',
+    soft:    'rgba(252,211,77,0.14)',
+    weight:  '700',
+    caption: 'Every great thing started as a spark',
+  },
+  {
+    word:    'Dreams',
+    icon:    'ic-dreams',
+    accent:  '#A78BFA',
+    glow:    'rgba(167,139,250,0.50)',
+    soft:    'rgba(167,139,250,0.15)',
+    weight:  '700',
+    caption: 'Where imagination has no ceiling',
+  },
+  {
+    word:    'Stories',
+    icon:    'ic-stories',
+    accent:  '#34D399',
+    glow:    'rgba(52,211,153,0.48)',
+    soft:    'rgba(52,211,153,0.14)',
+    weight:  '700',
+    caption: 'The worlds we carry inside us',
+  },
+  {
+    word:    'Projects',
+    icon:    'ic-projects',
+    accent:  '#FB923C',
+    glow:    'rgba(251,146,60,0.50)',
+    soft:    'rgba(251,146,60,0.14)',
+    weight:  '800',
+    caption: 'From zero to shipped — together',
+  },
+  {
+    word:    'Worlds',
+    icon:    'ic-worlds',
+    accent:  '#38BDF8',
+    glow:    'rgba(56,189,248,0.50)',
+    soft:    'rgba(56,189,248,0.14)',
+    weight:  '800',
+    caption: 'Entire universes waiting to exist',
+  },
+  {
+    word:    'Experiences',
+    icon:    'ic-experiences',
+    accent:  '#E879F9',
+    glow:    'rgba(232,121,249,0.50)',
+    soft:    'rgba(232,121,249,0.14)',
+    weight:  '700',
+    caption: 'Moments that leave their mark',
+  },
+];
+
+/* ─── DOM refs ───────────────────────────────────────────────── */
+const root        = document.documentElement;
+const wordA       = document.getElementById('wordA');
+const wordB       = document.getElementById('wordB');
+const midSizer    = document.getElementById('midSizer');
+const iconWrap    = document.getElementById('iconWrap');
+const accentBar   = document.getElementById('accentBar');
+const caption     = document.getElementById('caption');
+const dotsEl      = document.getElementById('dots');
+const progressBar = document.getElementById('progressBar');
+
+/* ─── State ──────────────────────────────────────────────────── */
+let current  = 0;
+let active   = wordA;   // currently visible word element
+let staging  = wordB;   // element being prepared off-screen
+let animating = false;
+let progressAnim = null;
+const DWELL = 3400;     // ms per word
+const TRANS = 550;      // ms per transition
+
+/* ─── Build dots ─────────────────────────────────────────────── */
+themes.forEach((t, i) => {
+  const d = document.createElement('button');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.setAttribute('role', 'tab');
+  d.setAttribute('aria-label', t.word);
+  d.addEventListener('click', () => jumpTo(i));
+  dotsEl.appendChild(d);
+});
+
+function getDots() { return dotsEl.querySelectorAll('.dot'); }
+
+/* ─── Mosaic tiles ───────────────────────────────────────────── */
+(function buildMosaic() {
+  const grid = document.getElementById('mosaicGrid');
+  for (let i = 0; i < 240; i++) {
+    const s = document.createElement('span');
+    const show = Math.random() < 0.18;
+    if (show) {
+      const dur = (6 + Math.random() * 8).toFixed(1) + 's';
+      const del = (Math.random() * 10).toFixed(1) + 's';
+      s.style.setProperty('--dur', dur);
+      s.style.setProperty('--delay', del);
+    } else {
+      s.style.animation = 'none';
+    }
+    grid.appendChild(s);
+  }
+})();
+
+/* ─── Apply theme to CSS vars ────────────────────────────────── */
+function applyTheme(t) {
+  root.style.setProperty('--accent',      t.accent);
+  root.style.setProperty('--accent-soft', t.soft);
+  root.style.setProperty('--glow-color',  t.glow);
+
+  // glow size: bigger for glowier themes
+  const glowIntensity = t.weight === '800' ? '72px' : '56px';
+  root.style.setProperty('--glow-size', glowIntensity);
+
+  // update caption
+  caption.style.transition = 'opacity 0.35s ease';
+  caption.style.opacity = '0';
+  setTimeout(() => {
+    caption.textContent = t.caption;
+    caption.style.opacity = '1';
+  }, 300);
+
+  // update icon
+  iconWrap.innerHTML = `<svg><use href="#${t.icon}"/></svg>`;
+
+  // restart bar animation
+  accentBar.style.animation = 'none';
+  void accentBar.offsetWidth; // reflow
+  accentBar.style.animation = 'bar-in 0.5s 0.35s cubic-bezier(0.16,1,0.3,1) forwards';
+}
+
+/* ─── Progress bar animation ─────────────────────────────────── */
+function startProgress() {
+  if (progressAnim) clearInterval(progressAnim);
+  const start = performance.now();
+  progressBar.style.transition = 'none';
+  progressBar.style.transform = 'scaleX(0)';
+  void progressBar.offsetWidth;
+
+  function step(now) {
+    const frac = Math.min((now - start) / DWELL, 1);
+    progressBar.style.transform = `scaleX(${frac})`;
+    if (frac < 1) progressAnim = requestAnimationFrame(step);
+  }
+  progressAnim = requestAnimationFrame(step);
+}
+
+/* ─── Core word transition ───────────────────────────────────── */
+function transition(nextIdx) {
+  if (animating) return;
+  animating = true;
+
+  const t = themes[nextIdx];
+
+  // update dots
+  getDots().forEach((d, i) => d.classList.toggle('active', i === nextIdx));
+
+  // 1. prepare staging element with next word (invisible)
+  staging.textContent  = t.word.toUpperCase();
+  staging.style.fontWeight = t.weight;
+  staging.className = 'hero-mid-word state-enter';
+  staging.removeAttribute('aria-hidden');
+
+  // update sizer for layout
+  midSizer.textContent = t.word.toUpperCase();
+  midSizer.style.fontWeight = t.weight;
+
+  // 2. exit active word
+  active.className = 'hero-mid-word state-exit';
+  active.setAttribute('aria-hidden', 'true');
+
+  // 3. apply new theme CSS vars a hair early for smooth glow change
+  setTimeout(() => applyTheme(t), TRANS * 0.3);
+
+  // 4. trigger enter animation after short delay (wait for exit)
+  setTimeout(() => {
+    staging.className = 'hero-mid-word state-enter running';
+  }, TRANS * 0.2);
+
+  // 5. cleanup after transition
+  setTimeout(() => {
+    active.className = 'hero-mid-word state-enter'; // hide old
+    active.setAttribute('aria-hidden', 'true');
+    staging.className = 'hero-mid-word state-idle';
+
+    // swap roles
+    [active, staging] = [staging, active];
+    current  = nextIdx;
+    animating = false;
+
+    startProgress();
+  }, TRANS + 80);
+}
+
+/* ─── Auto-cycle ─────────────────────────────────────────────── */
+let timer = null;
+function schedule() {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    const next = (current + 1) % themes.length;
+    transition(next);
+    schedule();
+  }, DWELL);
+}
+
+function jumpTo(idx) {
+  if (idx === current || animating) return;
+  clearTimeout(timer);
+  if (progressAnim) cancelAnimationFrame(progressAnim);
+  transition(idx);
+  schedule();
+}
+
+/* ─── Boot ───────────────────────────────────────────────────── */
+(function boot() {
+  const t = themes[0];
+  active.textContent = t.word.toUpperCase();
+  active.style.fontWeight = t.weight;
+  active.className = 'hero-mid-word state-idle';
+  midSizer.textContent = t.word.toUpperCase();
+  applyTheme(t);
+  startProgress();
+  schedule();
+})();
+
+/* ─── Pause on tab blur ──────────────────────────────────────── */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearTimeout(timer);
+    if (progressAnim) cancelAnimationFrame(progressAnim);
+  } else {
+    startProgress();
+    schedule();
+  }
+});
+</script>
+</body>
+</html>

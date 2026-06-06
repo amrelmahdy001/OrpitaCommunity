@@ -1,0 +1,198 @@
+/* ── 7. Foreground Content ──────────────────────────────────── */
+.hero__content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.hero__content-inner {
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* Eyebrow */
+.hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.35rem 0.9rem 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.hero__eyebrow-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: 0 0 8px var(--purple), 0 0 16px var(--purple-glow);
+  animation: dot-pulse 2.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.hero__eyebrow-text {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--white-70);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Headline */
+.hero__headline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+}
+
+.hero__headline-line {
+  display: block;
+  font-size: clamp(3.2rem, 8vw, 6.5rem);
+  color: var(--white);
+}
+
+.hero__headline-line--accent {
+  font-weight: 700;
+  color: var(--white);
+  text-shadow:
+    0 0 60px rgba(139, 92, 246, 0.35),
+    0 0 120px rgba(139, 92, 246, 0.15);
+  position: relative;
+}
+
+.hero__headline-line--accent::after {
+  content: '';
+  position: absolute;
+  bottom: -0.06em;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--purple), transparent);
+  border-radius: 1px;
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 1.2s;
+}
+
+.hero--loaded .hero__headline-line--accent::after {
+  width: 80%;
+}
+
+/* Description */
+.hero__description {
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  font-weight: 300;
+  color: var(--white-70);
+  line-height: 1.75;
+  max-width: 520px;
+  font-style: italic;
+}
+
+/* ── 8. Buttons ─────────────────────────────────────────────── */
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.6rem;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn--primary {
+  background: var(--purple);
+  color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.3);
+}
+
+.btn--primary:hover {
+  background: var(--purple-light);
+  box-shadow: 0 0 32px rgba(139, 92, 246, 0.5), 0 4px 16px rgba(139, 92, 246, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--white-70);
+  border: 1px solid var(--white-15);
+}
+
+.btn--ghost:hover {
+  border-color: var(--white-40);
+  color: var(--white);
+  background: var(--white-06);
+  transform: translateY(-1px);
+}
+
+/* ── 9. Stats ───────────────────────────────────────────────── */
+.hero__stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.hero__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.hero__stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.hero__stat-label {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--white-40);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.hero__stat-sep {
+  width: 1px;
+  height: 2rem;
+  background: var(--border);
+  flex-shrink: 0;
+}
